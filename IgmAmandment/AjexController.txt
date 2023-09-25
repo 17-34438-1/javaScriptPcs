@@ -1,0 +1,88 @@
+function notify_info_change(){
+		$notify_code=$_GET['Notify_code'];
+		$bl_igm_type=$_GET['bl_igm_type'];
+		
+			
+			if($bl_igm_type=="dtl")
+			{
+				$sql_igmDtlId="SELECT Notify_code,Notify_name,NotifyDesc,Notify_address
+				FROM igm_details WHERE Notify_code=$notify_code
+				ORDER BY id DESC LIMIT 1";
+				$igmDtlId = $this->bm->dataSelectDb1($sql_igmDtlId);
+			}
+			else
+			{
+				
+				$igmSubDtlId="SELECT Notify_code,Notify_name,NotifyDesc,Notify_address
+				FROM igm_supplimentary_detail WHERE Notify_code=$notify_code
+				ORDER BY id DESC LIMIT 1";
+				$igmDtlId = $this->bm->dataSelectDb1($igmSubDtlId);
+			}
+			$notify_name = "";
+			$notify_address = "";
+			$notify_description = "";
+			
+			for($i=0;$i<count($igmDtlId);$i++){
+				$notify_name = $igmDtlId[$i]['Notify_name'];
+				$notify_address = $igmDtlId[$i]['Notify_address'];
+				$notify_description = $igmDtlId[$i]['NotifyDesc'];
+				
+			}
+			
+		$data['notify_name']=$notify_name;
+		$data['notify_address']=$notify_address;
+		$data['notify_description']=$notify_description;
+		$data['notifierCount']=count($igmDtlId);
+		$data['notifiername'] = "Test Notifier";
+		$data['result']=$igmDtlId;
+		
+		
+		
+		echo json_encode($data);
+	}
+
+
+
+
+
+
+	function consignee_info_change(){
+		$consignee_code=$_GET['consignee_code'];
+		$bl_igm_type=$_GET['bl_igm_type'];
+		
+			
+			if($bl_igm_type=="dtl")
+			{
+				$sql_igmDtlId="SELECT igm_details.Consignee_code,igm_details.Consignee_address,igm_details.Consignee_name,igm_details.ConsigneeDesc
+				FROM igm_details WHERE Consignee_code='$consignee_code'
+				ORDER BY id DESC LIMIT 1";
+				$igmDtlId = $this->bm->dataSelectDb1($sql_igmDtlId);
+			}
+			else
+			{
+				
+			$igmSubDtlId="SELECT igm_supplimentary_detail.Consignee_code,igm_supplimentary_detail.Consignee_address,igm_supplimentary_detail.Consignee_name,igm_supplimentary_detail.ConsigneeDesc
+			FROM igm_supplimentary_detail WHERE Consignee_code='$consignee_code'
+			ORDER BY id DESC LIMIT 1";
+			$igmDtlId = $this->bm->dataSelectDb1($igmSubDtlId);
+			}
+			$consignee_name = "";
+			$Consignee_address = "";
+			
+			for($i=0;$i<count($igmDtlId);$i++){
+				$Consignee_name = $igmDtlId[$i]['Consignee_name'];
+				$Consignee_address = $igmDtlId[$i]['Consignee_address'];
+				
+			}
+			
+		$data['consignee_name']=$Consignee_name;
+		$data['consignee_address']=$Consignee_address;
+		$data['consigneeCount']=count($igmDtlId);
+		$data['result']=$igmDtlId;
+		
+		
+		
+		echo json_encode($data);
+	}
+	
+	

@@ -1,0 +1,108 @@
+ function getAgentOrg()
+	{
+		
+		$qry=$_GET['q'];
+		
+			$sql_igmOrgId="select  distinct Organization_Name,organization_profiles.id from organization_profiles inner join 
+		igm_details 
+		on igm_details.Submitee_Org_Id=organization_profiles.id
+		where igm_details.Import_Rotation_No='$qry'";
+		$igmOrgId = $this->bm->dataSelectDb1($sql_igmOrgId);
+	
+			
+		
+		$org_name = "";
+		$org_id = "";
+		
+		for($i=0;$i<count($igmOrgId);$i++){
+			$org_id = $igmOrgId[$i]['id'];
+			$org_name = $igmOrgId[$i]['Organization_Name'];
+			
+		}
+		$data['org_rslt']=$igmOrgId;
+		echo json_encode($data);
+
+		//$this->load->view('getAgent');
+
+	}
+	
+	
+	 function getMloCodeOrg()
+	{
+		$str_mlo = "";
+		$qry=$_GET['q'];
+		
+		if($qry=="all"){
+			$str_mlo="SELECT DISTINCT igm_details.mlocode FROM igm_details";
+		} else {
+			$str_mlo="SELECT DISTINCT igm_details.mlocode FROM igm_details 
+			WHERE igm_details.Submitee_Org_Id='$qry'";
+		}
+		
+		
+		$resultmlocode = $this->bm->dataSelectDb1($str_mlo);	
+		$data['mlo_rslt']=$resultmlocode;
+
+		
+		echo json_encode($data);
+
+		//$this->load->view('getAgent');
+
+	}
+		
+		
+
+
+
+// Mlo Discharge Summery List HMLT
+		function mloDischargeSummery()
+		{
+			//print_r($this->session->all_userdata());
+			$session_id = $this->session->userdata('value');
+			$LoginStat = $this->session->userdata('LoginStat');
+		
+			if($LoginStat!="yes")
+			{
+				$this->logout();
+				//$this->load->view('header');
+				//$this->load->view('welcomeview_1', $data);
+				//$this->load->view('footer');
+			}
+			else
+			{
+				$data['title']="MLO DISCHARGE SUMMARY LIST...";
+				$this->load->view('cssAssets');
+				$this->load->view('headerTop');
+				$this->load->view('sidebar');
+				$this->load->view('myReportMloDischargeHTML',$data);
+				$this->load->view('jsAssets');
+			}
+		}
+
+		// Mlo Discharge Summery List report
+		function mloDischargeSummeryView()
+		{
+			//print_r($this->session->all_userdata());
+			$session_id = $this->session->userdata('value');
+			$LoginStat = $this->session->userdata('LoginStat');
+		
+			if($LoginStat!="yes")
+			{
+				$this->logout();
+				
+			}
+			else
+			{
+				$ddl_imp_rot_no=$this->input->post('ddl_imp_rot_no');
+				if($_POST['options'] == 'html'){
+					$this->load->view('cssAssets');
+					$this->load->view('myReportMloDischargeList');
+					$this->load->view('myclosebar');
+					$this->load->view('jsAssets');
+				}else if($_POST['options'] == 'xl'){
+					$this->load->view('myReportMloDischargeList');
+					$this->load->view('myclosebar');
+				}
+			}
+        }	
+		//Discharge Summery List HMLT

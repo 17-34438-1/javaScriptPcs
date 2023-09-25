@@ -1,0 +1,183 @@
+	function dailyEquipmentBookingOpPosition()
+	{
+		$session_id = $this->session->userdata('value');
+		$LoginStat = $this->session->userdata('LoginStat');
+		
+		if($LoginStat!="yes")
+		{
+			$this->logout();
+		}
+		else
+		{	
+			
+			$data['msg']="";
+			if($this->input->post('delete'))
+			{
+				$eid=$this->input->post('eid');
+				$deleteSql="DELETE FROM ctmsmis.mis_equipment_op_booking_pos WHERE ctmsmis.mis_equipment_op_booking_pos.id='$eid'";
+				$deleteStat=$this->bm->dataDeleteDb2($deleteSql);
+				$data['msg']="<font color='red'><b>Data Deleted.</b></font>";
+			}	
+			
+			$rslt_sql="SELECT id, `workshop_zone`, `equipment`, `equip_num`,non_operational,equip_supply, `updated_by`, `update_time` FROM ctmsmis.equip_assign_detail";
+			$result=$this->bm->dataSelectDb2($rslt_sql);			
+			$data['result']=$result;
+				
+			//$query = "SELECT id, eguip_no, op_name, yard, shift,date FROM ctmsmis.mis_equipment_op_booking_pos WHERE DATE = DATE(NOW()) ORDER BY DATE DESC";
+			// $query = "SELECT id, eguip_no, op_name, yard, shift,date FROM ctmsmis.mis_equipment_op_booking_pos ORDER BY DATE DESC";
+			$query = "SELECT id, eguip_no, op_name, yard, shift,date FROM ctmsmis.mis_equipment_op_booking_pos WHERE DATE = DATE(NOW()) ORDER BY DATE DESC";
+			$bookingEquiList = $this->bm->dataSelectDb2($query);
+				
+			$data['bookingEquiList']=$bookingEquiList;
+			$data['title']="Equipment Booking Operatior Position(GCB)";
+			$data['editFlag']=0;
+			$msg="";
+			$this->load->view('cssAssetsList');
+			$this->load->view('headerTop');
+			$this->load->view('sidebar');
+			$this->load->view('dailyEquipmentBookingOpPosition',$data);
+			$this->load->view('jsAssetsList');
+			
+		}	
+	}
+	
+	
+		
+	
+	function dailyEquipmentBookingOpPositionAction()
+	{
+		$session_id = $this->session->userdata('value');
+		$LoginStat = $this->session->userdata('LoginStat');
+		
+		if($LoginStat!="yes")
+		{
+			$this->logout();
+		}
+		else
+		{			
+			$login_id = $this->session->userdata('login_id');	
+			$date=$this->input->post('eqpdate');
+			$gcb=$this->input->post('gcb');
+
+			$shift_no=$this->input->post('shift_no');
+			$equip_no=$this->input->post('eguip_no');
+			$op_name=$this->input->post('op_name');
+			$yard_name=$this->input->post('yard_name');
+						
+			if($this->input->post('update'))
+			{		
+				$equipID=$this->input->post('equipID');
+				$updateSql="UPDATE ctmsmis.mis_equipment_op_booking_pos set eguip_no ='$equip_no', op_name='$op_name', shift='$shift_no', date='$date',
+				 created_by='$login_id', yard='$yard_name', created_at=now() where ctmsmis.mis_equipment_op_booking_pos.id='$equipID'";
+				// return;
+				$updateStat=$this->bm->dataUpdatedb2($updateSql);
+				
+				if($updateStat==1)
+					$data['msg']="<font color='green'><b>Data succesfully updated</b></font>";
+				else
+					$data['msg']="<font color='red'><b>Updation failed</b></font>";				
+			}
+					
+			else
+			{				
+				$insertQuery="insert into ctmsmis.mis_equipment_op_booking_pos (eguip_no, op_name, shift, date, yard, created_by, created_at,terminal) 
+							values ('$equip_no','$op_name','$shift_no','$date','$yard_name','$login_id',now(),'$gcb')";
+							// echo $insertQuery;return;
+				$entryStat=$this->bm->dataInsertDb2($insertQuery);
+				if($entryStat==1)
+				{
+					$data['msg']="<font color='green'><b>Data Successfully Inserted.</b></font>";
+				}
+				else
+				{
+					$data['msg']="<font color='red'><b>Data Not Inserted.</b></font>";
+				}
+			}
+			$query = "SELECT id, eguip_no, op_name, yard, shift,date FROM ctmsmis.mis_equipment_op_booking_pos WHERE DATE = DATE(NOW()) AND  terminal NOT IN ('CCT','NCT')   ORDER BY DATE DESC";
+			// $query = "SELECT id, eguip_no, op_name, yard, shift,date FROM ctmsmis.mis_equipment_op_booking_pos ORDER BY DATE DESC";
+			$bookingEquiList = $this->bm->dataSelectDb2($query);
+				
+			$data['bookingEquiList']=$bookingEquiList;
+			$data['title']="Equipment Booking Operatior Position";
+			$data['editFlag']=0;
+			$msg="";
+			$this->load->view('cssAssetsList');
+			$this->load->view('headerTop');
+			$this->load->view('sidebar');
+			$this->load->view('dailyEquipmentBookingOpPosition',$data);
+			$this->load->view('jsAssetsList');
+		}	
+	}
+	
+	function dailyEquipmentBookingOpPositionEdit()
+	{
+        $session_id = $this->session->userdata('value');
+		$LoginStat = $this->session->userdata('LoginStat');
+		
+		if($LoginStat!="yes")
+		{
+			$this->logout();
+		}
+		else
+		{           
+            $eqiID= $this->input->post('eqiID');
+                
+			$select_sql="SELECT id, eguip_no, op_name, yard, shift, date FROM ctmsmis.mis_equipment_op_booking_pos 
+			where mis_equipment_op_booking_pos.id='$eqiID'";
+			
+			$select_result=$this->bm->dataSelectDb2($select_sql);			
+			$data['select_result']=$select_result;
+			
+			$query = "SELECT id, eguip_no, op_name, yard, shift,date FROM ctmsmis.mis_equipment_op_booking_pos WHERE DATE = DATE(NOW()) AND  terminal NOT IN ('CCT','NCT')  ORDER BY DATE DESC";
+			// $query = "SELECT id, eguip_no, op_name, yard, shift,date FROM ctmsmis.mis_equipment_op_booking_pos ORDER BY DATE DESC";
+			$bookingEquiList=$this->bm->dataSelectDb2($query);			
+			$data['bookingEquiList']=$bookingEquiList;
+
+			$data['editFlag']=1;
+			$msg="";
+			$data['title']="Equipment Booking Operatior Position";
+			$data['msg']=$msg;
+
+			$this->load->view('cssAssetsList');
+			$this->load->view('headerTop');
+			$this->load->view('sidebar');
+			$this->load->view('dailyEquipmentBookingOpPosition',$data);
+			$this->load->view('jsAssetsList');
+        }
+	}
+	
+	function dailyEquipmentBookingOpPositionSearch()
+	{
+        $session_id = $this->session->userdata('value');
+		$LoginStat = $this->session->userdata('LoginStat');
+		
+		if($LoginStat!="yes")
+		{
+			$this->logout();
+		}
+		else
+		{	
+			$data['msg']="";
+			$opDate = $this->input->post('opDate');
+			$opShift = $this->input->post('opShift');
+			if($opShift=='All')		
+				$shift=" ";			
+			else
+				$shift=" and shift = '$opShift' ";
+	
+			 $query = "SELECT id, eguip_no, op_name, yard, shift,date FROM ctmsmis.mis_equipment_op_booking_pos WHERE DATE = '$opDate'  
+			$shift AND (terminal NOT IN ('CCT','NCT') OR terminal IS NULL) ORDER BY DATE DESC";
+			$bookingEquiList = $this->bm->dataSelectDb2($query);
+				
+			$data['bookingEquiList']=$bookingEquiList;
+			$data['title']="Equipment Booking Operatior Position";
+			
+			$data['editFlag']=0;
+			$msg="";
+			$this->load->view('cssAssetsList');
+			$this->load->view('headerTop');
+			$this->load->view('sidebar');
+			$this->load->view('dailyEquipmentBookingOpPosition',$data);
+			$this->load->view('jsAssetsList');
+		}	
+	}

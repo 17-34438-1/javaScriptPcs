@@ -1,0 +1,650 @@
+function igmAmendmentForm()
+	{
+		$session_id = $this->session->userdata('value');
+		$LoginStat = $this->session->userdata('LoginStat');	
+		$search_by =$this->input->post("search_by");
+
+		if($LoginStat!="yes")
+		{
+			$this->logout();
+		}
+		else
+		{
+			$data['title'] = "IGM Amendment Form";
+			$msg = "";
+			 
+			$data['msg'] = $msg;
+	
+			$this->load->view('cssAssets');
+			$this->load->view('headerTop');
+			$this->load->view('sidebar');
+			$this->load->view('igm_amendment_form',$data);
+			$this->load->view('jsAssets');
+		}
+	}
+	
+	function amendment_form(){
+	
+		$session_id = $this->session->userdata('value');	
+		$rotation=$this->input->post('rot_no');
+		$bl=$this->input->post('bl_no');	
+		$container=$this->input->post('cont_no');	
+		
+		$bl_selected =$this->input->post("bl_selected");
+		$igm_type =$this->input->post("igm_type");
+
+		if($session_id!=$this->session->userdata('session_id'))
+		{
+			$this->logout();
+		}
+		else
+		{
+			if($bl_selected=="bl") //BL Amendment
+			{				
+				$data['title']="Bl Amendment Form";
+				$igmType = "";
+				$sql_igmDtlId="SELECT id FROM igm_supplimentary_detail WHERE Import_Rotation_No='$rotation' AND BL_No='$bl'";
+				$igmDtlId = $this->bm->dataSelectDb1($sql_igmDtlId);
+				
+				$igmType="sup";
+				$row=count($igmDtlId);
+		
+				if($row==0)
+				{
+					$sql_igmDtlId="SELECT id FROM igm_details WHERE Import_Rotation_No='$rotation' AND BL_No='$bl'";
+					$igmDtlId = $this->bm->dataSelectDb1($sql_igmDtlId);
+					$igmType="dtl";					
+				}
+				
+				if(count($igmDtlId)==0)
+				{
+					$data['title'] = "IGM Amendment Form";
+					$msg = "<font size='3' color='red'><strong>Invalid Combination of Rotation and BL</strong></font>";
+					 
+					$data['msg'] = $msg;
+			
+					$this->load->view('cssAssets');
+					$this->load->view('headerTop');
+					$this->load->view('sidebar');
+					$this->load->view('igm_amendment_form',$data);
+					$this->load->view('jsAssets');
+				}
+				else
+				{
+					if($igmType=="dtl"){
+						$sql_igmDtlInfo="SELECT id,Import_Rotation_No,BL_No,Line_No,type_of_igm,description_of_goods,Pack_Number,
+						Pack_Description,Pack_Marks_Number,Exporter_name,Exporter_address,Notify_code,Notify_name,Notify_address,
+						NotifyDesc,Consignee_code,Consignee_name,Consignee_address,ConsigneeDesc,weight,Volume_in_cubic_meters,
+						port_of_origin,place_of_unloading,PFstatus,Submitee_Id,DG_status,imco,un
+						FROM igm_details
+						WHERE Import_Rotation_No='$rotation' AND BL_No='$bl'";
+					}
+					else{		
+						$sql_igmDtlInfo="SELECT id,Import_Rotation_No,BL_No,Line_No,type_of_igm,description_of_goods,Pack_Number,
+						Pack_Description,Pack_Marks_Number,Exporter_name,Exporter_address,Notify_code,Notify_name,Notify_address,
+						NotifyDesc,Consignee_code,Consignee_name,Consignee_address,ConsigneeDesc,weight,Volume_in_cubic_meters,
+						port_of_origin,'' AS place_of_unloading,PFstatus,Submitee_Id,DG_status,'' as imco,'' as un
+						FROM igm_supplimentary_detail
+						WHERE Import_Rotation_No='$rotation' AND BL_No='$bl'";					
+					}	
+					$igmDtlInfo = $this->bm->dataSelectDb1($sql_igmDtlInfo);
+					
+					$bl_id="";
+					$bl_no="";
+					$line_No="";
+					$type_of_igm="";
+					$description_of_goods="";
+					$pack_Number="";
+					$pack_Description="";
+					$pack_Marks_Number="";
+					$exporter_name="";
+					$exporter_address="";
+					$notify_code="";
+					$notify_name="";
+					$notify_address="";
+					$notifyDesc="";
+					$consignee_code="";
+					$Consignee_name="";
+					$consignee_address="";
+					$consigneeDesc="";
+					$weight="";
+					$volume_in_cubic_meters="";
+					$port_of_origin="";
+					$PFstatus="";
+					$Submitee_Id="";
+					$place_of_unloading="";
+					$DG_status="";
+					$imco="";
+					$un="";
+						
+					for($j=0;$j<count($igmDtlInfo);$j++){					
+						$bl_id= $igmDtlInfo[$j]['id'];
+						$bl_no= $igmDtlInfo[$j]['BL_No'];
+						$rotation= $igmDtlInfo[$j]['Import_Rotation_No'];
+						$line_No= $igmDtlInfo[$j]['Line_No'];
+						$type_of_igm= $igmDtlInfo[$j]['type_of_igm'];
+						$description_of_goods= $igmDtlInfo[$j]['description_of_goods'];
+						$pack_Number= $igmDtlInfo[$j]['Pack_Number'];
+						$pack_Description= $igmDtlInfo[$j]['Pack_Description'];
+						$pack_Marks_Number= $igmDtlInfo[$j]['Pack_Marks_Number'];
+						$exporter_name= $igmDtlInfo[$j]['Exporter_name'];
+						$exporter_address= $igmDtlInfo[$j]['Exporter_address'];
+						$notify_code= $igmDtlInfo[$j]['Notify_code'];
+						$notify_name= $igmDtlInfo[$j]['Notify_name'];
+						$notify_address= $igmDtlInfo[$j]['Notify_address'];
+						$notifyDesc= $igmDtlInfo[$j]['NotifyDesc'];
+						$consignee_code= $igmDtlInfo[$j]['Consignee_code'];
+						$Consignee_name= $igmDtlInfo[$j]['Consignee_name'];
+						$consignee_address= $igmDtlInfo[$j]['Consignee_address'];
+						$consigneeDesc= $igmDtlInfo[$j]['ConsigneeDesc'];
+						$weight= $igmDtlInfo[$j]['weight'];
+						$volume_in_cubic_meters= $igmDtlInfo[$j]['Volume_in_cubic_meters'];
+						$port_of_origin= $igmDtlInfo[$j]['port_of_origin'];
+						$place_of_unloading= $igmDtlInfo[$j]['place_of_unloading'];
+						$PFstatus= $igmDtlInfo[$j]['PFstatus'];
+						$Submitee_Id= $igmDtlInfo[$j]['Submitee_Id'];	
+						$DG_status= $igmDtlInfo[$j]['DG_status'];	
+						$imco= $igmDtlInfo[$j]['imco'];	
+						$un= $igmDtlInfo[$j]['un'];	
+					}
+					
+					$data['bl_id']=$bl_id;
+					$data['bl_no']=$bl_no;
+					$data['rotation']=$rotation;
+					$data['line_No']=$line_No;
+					$data['type_of_igm']=$type_of_igm;
+					$data['description_of_goods']=$description_of_goods;
+					$data['pack_Number']=$pack_Number;
+					$data['pack_Description']=$pack_Description;
+					$data['pack_Marks_Number']=$pack_Marks_Number;
+					$data['exporter_name']=$exporter_name;
+					$data['exporter_address']=$exporter_address;
+					$data['notify_code']=$notify_code;
+					$data['notify_name']=$notify_name;
+					$data['notify_address']=$notify_address;
+					$data['notifyDesc']=$notifyDesc;
+					$data['consignee_code']=$consignee_code;
+					$data['Consignee_name']=$Consignee_name;
+					$data['consignee_address']=$consignee_address;
+					$data['consigneeDesc']=$consigneeDesc;
+					$data['weight']=$weight;
+					$data['volume_in_cubic_meters']=$volume_in_cubic_meters;
+					$data['port_of_origin']=$port_of_origin;
+					$data['PFstatus']=$PFstatus;
+					$data['Submitee_Id']=$Submitee_Id;
+					$data['place_of_unloading']=$place_of_unloading;						
+					$data['DG_status']=$DG_status;						
+					$data['imco']=$imco;						
+					$data['un']=$un;						
+					
+					$data['result']=$igmDtlInfo;
+					$data['igmType']=$igmType;
+					$data['bl_selected']=$bl_selected;
+					$this->load->view('cssAssets');
+					$this->load->view('headerTop');
+					$this->load->view('sidebar');
+					$this->load->view('bl_amendment_form',$data);
+					$this->load->view('jsAssets');
+				}			
+			}
+			else //Container Amendment
+			{
+				$data['title']="Container Amendment Form";
+				$igmType = "";
+
+			 	$qr="SELECT igm_sup_detail_container.id
+				FROM igm_sup_detail_container
+				INNER JOIN igm_supplimentary_detail ON igm_supplimentary_detail.id=igm_sup_detail_container.igm_sup_detail_id
+				WHERE igm_supplimentary_detail.Import_Rotation_No='$rotation' AND cont_number='$container' AND
+				igm_supplimentary_detail.BL_No='$bl'";
+				$igmSubDetailId = $this->bm->dataSelectDb1($qr);
+				
+				$row=count($igmSubDetailId);
+				
+				if($row==0)
+				{
+					$qr="SELECT igm_detail_container.id
+					FROM igm_detail_container
+					INNER JOIN igm_details ON igm_details.id=igm_detail_container.igm_detail_id
+					WHERE igm_details.Import_Rotation_No='$rotation' AND cont_number='$container' AND igm_details.BL_No='$bl' ";
+					$igmSubDetailId=$this->bm->dataSelectDB1($qr);	
+					$igmType="dtl";			
+				} else {
+					$igmType="sup";
+				}
+
+				if(count($igmSubDetailId)==0)
+				{
+					$data['title'] = "IGM Amendment Form";
+					$msg = "<font size='3' color='red'><strong>Invalid Combination of Rotation, BL and Container</strong></font>";
+					 
+					$data['msg'] = $msg;
+			
+					$this->load->view('cssAssets');
+					$this->load->view('headerTop');
+					$this->load->view('sidebar');
+					$this->load->view('igm_amendment_form',$data);
+					$this->load->view('jsAssets');
+				}				
+				else
+				{
+					if($igmType=="dtl"){
+						$sql_cont_info="SELECT igm_detail_container.id AS igm_id,igm_details.Import_Rotation_No,
+										igm_details.BL_No,cont_number,cont_size,cont_status,cont_height,cont_weight,cont_iso_type,
+										cont_type,cont_vat,cont_number_packaages,Cont_gross_weight,cont_seal_number,off_dock_id
+										FROM igm_detail_container
+										INNER JOIN igm_details ON igm_details.id=igm_detail_container.igm_detail_id
+										WHERE igm_details.Import_Rotation_No='$rotation' AND 
+										cont_number='$container' AND igm_details.BL_No='$bl'";
+					}
+					else{
+						$sql_cont_info="SELECT igm_sup_detail_container.id AS igm_id,igm_supplimentary_detail.Import_Rotation_No,
+										igm_supplimentary_detail.BL_No,cont_number,cont_size,cont_height,cont_status,cont_weight,
+										cont_iso_type,cont_type,cont_vat,cont_number_packaages,Cont_gross_weight,
+										cont_seal_number,off_dock_id
+										FROM igm_sup_detail_container
+										INNER JOIN igm_supplimentary_detail ON igm_supplimentary_detail.id=igm_sup_detail_container.igm_sup_detail_id
+										WHERE igm_supplimentary_detail.Import_Rotation_No='$rotation' AND cont_number='$container' AND
+										igm_supplimentary_detail.BL_No='$bl'";			
+					}						
+					$cont_info = $this->bm->dataSelectDb1($sql_cont_info);
+					
+					$igm_id = "";
+					$rot = "";
+					$cont_number = "";
+					$bl_number = "";
+					$cont_size = "";
+					$cont_height = "";
+					$cont_status = "";
+					$cont_weight = "";
+					$cont_iso_type = "";
+					$cont_type = "";
+					$cont_vat = "";
+					$cont_number_packaages = "";
+					$cont_gross_weight = "";
+					$cont_seal_number = "";
+					$off_dock_id = "";
+					
+					for($i=0;$i<count($cont_info);$i++){
+						$igm_id = $cont_info[$i]['igm_id'];
+						$rot = $cont_info[$i]['Import_Rotation_No'];
+						$cont_number = $cont_info[$i]['cont_number'];
+						$bl_number = $cont_info[$i]['BL_No'];
+						$cont_size = $cont_info[$i]['cont_size'];
+						$cont_height = $cont_info[$i]['cont_height'];
+						$cont_status = $cont_info[$i]['cont_status'];
+						$cont_weight = $cont_info[$i]['cont_weight'];
+						$cont_iso_type = $cont_info[$i]['cont_iso_type'];
+						$cont_type = $cont_info[$i]['cont_type'];
+						$cont_vat = $cont_info[$i]['cont_vat'];
+						$cont_number_packaages = $cont_info[$i]['cont_number_packaages'];
+						$cont_gross_weight = $cont_info[$i]['Cont_gross_weight'];
+						$cont_seal_number = $cont_info[$i]['cont_seal_number'];
+						$off_dock_id = $cont_info[$i]['off_dock_id'];
+					}
+					
+					$data['cont_info']=$cont_info;
+					
+					$data['igm_id']=$igm_id;
+					$data['rot']=$rot;
+					$data['cont_number']=$cont_number;
+					$data['bl_number']=$bl_number;
+					$data['cont_size']=$cont_size;
+					$data['cont_height']=$cont_height;
+					$data['cont_status']=$cont_status;
+					$data['cont_weight']=$cont_weight;
+					$data['cont_iso_type']=$cont_iso_type;
+					$data['cont_type']=$cont_type;
+					$data['cont_vat']=$cont_vat;
+					$data['cont_number_packaages']=$cont_number_packaages;
+					$data['cont_gross_weight']=$cont_gross_weight;
+					$data['cont_seal_number']=$cont_seal_number;
+					$data['off_dock_id']=$off_dock_id;
+					
+					$data['igmType']=$igmType;
+					
+					$this->load->view('cssAssets');
+					$this->load->view('headerTop');
+					$this->load->view('sidebar');
+					$this->load->view('cont_amendment_form',$data);
+					$this->load->view('jsAssets');
+				}	
+			}			
+		}
+	}
+	
+	function bl_amendment_update_value(){
+		$session_id = $this->session->userdata('value');		
+		$login_id = $this->session->userdata('login_id');
+
+		if($session_id!=$this->session->userdata('session_id'))
+		{
+			$this->logout();
+		}
+		else
+		{
+
+			$msg="";
+
+			$changed_fields = array();
+			$change_type="BL";
+			$bl_selected_value=$this->input->post("bl_selected_value");
+			
+			$ipaddress = $_SERVER['REMOTE_ADDR'];
+
+			$bl_id=$this->input->post("bl_id");
+			$igm_type=$this->input->post("bl_igm_type");	
+			$rotation=$this->input->post('rotation');
+
+			$bl_no=$this->input->post('BL_No');	
+			$BL_No_pre_text=$this->input->post('BL_No_pre_text');	
+			
+			$pck_num=$this->input->post('pack_Number');	
+			$Pack_Number_pre_text=$this->input->post('Pack_Number_pre_text');	
+
+			$pck_marks_num=$this->input->post('pack_Marks_Number');	
+			$Pack_Marks_Number_pre_text=$this->input->post('Pack_Marks_Number_pre_text');	
+
+			$weight=$this->input->post('weight');	
+			$weight_pre_text=$this->input->post('weight_pre_text');	
+
+			$exp_addr=$this->input->post('exporter_address');	
+			$Exporter_address_pre_text=$this->input->post('Exporter_address_pre_text');	
+
+
+			$not_name=$this->input->post('notify_name');
+			$Notify_name_pre_text=$this->input->post('Notify_name_pre_text');
+
+			$cons_code=$this->input->post('consignee_code');
+			$Consignee_code_pre_text=$this->input->post('Consignee_code_pre_text');
+
+			$cons_addr=$this->input->post('consignee_address');	
+			$consignee_address_pre_text=$this->input->post('consignee_address_pre_text');	
+
+
+			$PFstatus=$this->input->post('PFstatus');
+			$PFstatus_pre_text=$this->input->post('PFstatus_pre_text');
+
+			$Submitee_Id=$this->input->post('submiteeId');	
+			$Submitee_Id_pre_text=$this->input->post('Submitee_Id_pre_text');	
+
+			$line_no=$this->input->post('line_No');	
+			$Line_No_pre_text=$this->input->post('Line_No_pre_text');	
+
+
+			$pck_desc=$this->input->post('pack_Description');	
+			$pack_Description_pre_text=$this->input->post('pack_Description_pre_text');	
+
+
+
+			$goods_desc=$this->input->post('description_goods');
+			$description_goods_pre_text=$this->input->post('description_goods_pre_text');
+			
+			
+			$exp_name=$this->input->post('exporter_name');	
+			$exporter_name_pre_text=$this->input->post('exporter_name_pre_text');	
+
+
+
+			$not_code=$this->input->post('notify_code');	
+			$notify_code_pre_text=$this->input->post('notify_code_pre_text');	
+
+			$not_addr=$this->input->post('notify_address');
+			$Notify_address_pre_text=$this->input->post('Notify_address_pre_text');	
+			
+			$notify_desc=$this->input->post('notify_desc');
+			$Notify_desc_pre_text=$this->input->post('Notify_desc_pre_text');	
+
+			
+			$cons_name=$this->input->post('consignee_name');	
+			$consignee_name_pre_text=$this->input->post('consignee_name_pre_text');	
+
+		
+			$Volume_in_cubic_meters=$this->input->post('volumeInCubicMeters');	
+			$volumeInCubicMeters_pre_text=$this->input->post('volumeInCubicMeters_pre_text');	
+
+
+			$origine_code=$this->input->post('portOfOrigin');	
+			$port_of_origin_pre_text=$this->input->post('port_of_origin_pre_text');	
+
+			$type_of_igm=$this->input->post('type_of_igm');	
+			$type_of_igm_pre_text=$this->input->post('type_of_igm_pre_text');	
+			
+			$dg_status = "";
+			$imco = "";
+			$un = "";
+			
+			if(isset($_POST['dg_check'])) {
+				$dg_status = $this->input->post('dg_status');
+			} else {
+				$dg_status = null;
+			}
+			
+			$dg_status_pre_text=$this->input->post('dg_status_pre_text');	
+			
+			if(isset($_POST['imco_check'])) {
+				$imco=$this->input->post('imco');	
+			} else {
+				$imco = null;
+			}
+			
+			$imco_pre_text=$this->input->post('imco_pre_text');	
+			
+			if(isset($_POST['un_check'])) {
+				$un=$this->input->post('un');	
+			} else {
+				$un = null;
+			}
+				
+			$un_pre_text=$this->input->post('un_pre_text');	
+
+			$date_time = date("Y-m-d H:i:s");
+
+			if($BL_No_pre_text != $bl_no){
+				array_push($changed_fields,array("change_field"=>"BL_No","prior_value"=>$BL_No_pre_text,"new_value"=>$bl_no));
+			} 
+
+			if($Pack_Number_pre_text != $pck_num){
+				array_push($changed_fields,array("change_field"=>"Pack_Info","prior_value"=>$Pack_Number_pre_text ,"new_value"=>$pck_num));
+			} 
+
+			if($Pack_Marks_Number_pre_text != $pck_marks_num){
+				array_push($changed_fields,array("change_field"=>"Pack_Info","prior_value"=>$Pack_Marks_Number_pre_text ,"new_value"=>$pck_marks_num));
+			} 
+
+			if($weight_pre_text != $weight){
+				array_push($changed_fields,array("change_field"=>"weight","prior_value"=>$weight_pre_text,"new_value"=>$weight));
+			} 
+			
+			if($Exporter_address_pre_text != $exp_addr){
+				array_push($changed_fields,array("change_field"=>"Exporter_address","prior_value"=>$Exporter_address_pre_text,"new_value"=>$exp_addr));
+			} 
+
+			if($Notify_name_pre_text != $not_name){
+				array_push($changed_fields,array("change_field"=>"Notify_name","prior_value"=>$Notify_name_pre_text,"new_value"=>$not_name));
+			} 
+
+			if($Consignee_code_pre_text != $cons_code){
+				array_push($changed_fields,array("change_field"=>"Consignee_Info","prior_value"=>$Consignee_code_pre_text,"new_value"=>$cons_code));
+			}			
+
+			if($Line_No_pre_text != $line_no){
+				array_push($changed_fields,array("change_field"=>"Line_No","prior_value"=>$Line_No_pre_text,"new_value"=>$line_no));
+			}	
+
+			if($PFstatus_pre_text != $PFstatus){
+				array_push($changed_fields,array("change_field"=>"PFstatus","prior_value"=>$PFstatus_pre_text,"new_value"=>$PFstatus));
+			}
+			
+			if($Submitee_Id_pre_text != $Submitee_Id){
+				array_push($changed_fields,array("change_field"=>"Submitee_Id","prior_value"=>$Submitee_Id_pre_text,"new_value"=>$Submitee_Id));
+			}			
+
+			if($place_of_unloading_pre_text != $unload_code){
+				array_push($changed_fields,array("change_field"=>"place_of_unloading","prior_value"=>$place_of_unloading_pre_text,"new_value"=>$unload_code));
+			}
+
+			if($pack_Description_pre_text != $pck_desc){
+				array_push($changed_fields,array("change_field"=>"Pack_Description","prior_value"=>$pack_Description_pre_text,"new_value"=>$pck_desc));
+			}
+
+			if($description_goods_pre_text!= $goods_desc){
+				array_push($changed_fields,array("change_field"=>"description_of_goods","prior_value"=>$description_goods_pre_text,"new_value"=>$goods_desc));
+			}		
+
+			if($exporter_name_pre_text != $exp_name){
+				array_push($changed_fields,array("change_field"=>"Exporter_name","prior_value"=>$exporter_name_pre_text,"new_value"=>$exp_name));
+			}		
+
+			if($notify_code_pre_text != $not_code){
+				array_push($changed_fields,array("change_field"=>"Notify_code","prior_value"=>$notify_code_pre_text,"new_value"=>$not_code));
+			}
+			
+			if($Notify_address_pre_text != $not_addr){
+				array_push($changed_fields,array("change_field"=>"Notify_address","prior_value"=>$Notify_address_pre_text,"new_value"=>$not_addr));
+			}
+			
+			if($Notify_desc_pre_text != $notify_desc){
+				array_push($changed_fields,array("change_field"=>"NotifyDesc","prior_value"=>$Notify_desc_pre_text,"new_value"=>$notify_desc));
+			}			
+		
+			if($consignee_name_pre_text != $cons_name){
+				array_push($changed_fields,array("change_field"=>"Consignee_Info","prior_value"=>$consignee_name_pre_text,"new_value"=>$cons_name));
+			}
+			
+			if($volumeInCubicMeters_pre_text != $Volume_in_cubic_meters){
+				array_push($changed_fields,array("change_field"=>"Volume_in_cubic_meters","prior_value"=>$volumeInCubicMeters_pre_text,"new_value"=>$Volume_in_cubic_meters));
+			}		
+
+			if($port_of_origin_pre_text != $origine_code){
+				array_push($changed_fields,array("change_field"=>"port_of_origin","prior_value"=>$port_of_origin_pre_text,"new_value"=>$origine_code));
+			}
+
+			if($type_of_igm_pre_text != $type_of_igm){
+				array_push($changed_fields,array("change_field"=>"type_of_igm","prior_value"=>$type_of_igm_pre_text,"new_value"=>$type_of_igm));
+			}
+
+			if($consignee_address_pre_text != $cons_addr){
+				array_push($changed_fields,array("change_field"=>"Consignee_Info","prior_value"=>$consignee_address_pre_text,"new_value"=>$cons_addr));
+			}
+			
+			if($dg_status_pre_text != $dg_status){
+				array_push($changed_fields,array("change_field"=>"DG_status","prior_value"=>$dg_status_pre_text,"new_value"=>$dg_status));
+			}
+			
+			if($imco_pre_text != $imco){
+				array_push($changed_fields,array("change_field"=>"imco","prior_value"=>$imco_pre_text,"new_value"=>$imco));
+			}
+			
+			if($un_pre_text != $un){
+				array_push($changed_fields,array("change_field"=>"un","prior_value"=>$un_pre_text,"new_value"=>$un));
+			}
+			
+			for($c=0;$c<count($changed_fields);$c++)
+			{
+				$change_field = $changed_fields[$c]['change_field'];
+				$prior_value = $changed_fields[$c]['prior_value'];
+				$new_value = $changed_fields[$c]['new_value'];
+				
+				$sql="INSERT INTO igm_correction_log(change_type,ref_tbl_id,igm_type,change_field,prior_value,new_value,
+				entry_by,entry_at,entry_ip)
+				VALUES ('$change_type','$bl_id','$bl_igm','$change_field','$prior_value','$new_value','$login_id','$date_time','$ipaddress')";	
+				$logFlag_1 = $this->bm->dataInsertDB1($sql);
+			}
+			
+			if($igm_type=="dtl")
+			{				
+				$updateIgmQry="update igm_details set Line_No='$line_no',BL_No='$bl_no',Pack_Number='$pck_num',
+					Pack_Description='$pck_desc',Pack_Marks_Number='$pck_marks_num',Description_of_Goods='$goods_desc',
+					weight='$weight',Exporter_name='$exp_name',Exporter_address='$exp_addr',Notify_code='$not_code',
+					Notify_name='$not_name',Notify_address='$not_addr',NotifyDesc='$notify_desc',Consignee_code='$cons_code',
+					Consignee_name='$cons_name',Consignee_address='$cons_addr',port_of_origin='$origine_code',
+					Volume_in_cubic_meters='$Volume_in_cubic_meters',PFstatus='$PFstatus',Submitee_Id=CONCAT('$Submitee_Id','M'),
+					type_of_igm='$type_of_igm',DG_status='$dg_status',imco='$imco',un='$un'
+					where id='$bl_id'";		
+			}
+			else
+			{		
+				$updateIgmQry="update igm_supplimentary_detail set Line_No='$line_no',BL_No='$bl_no',Pack_Number='$pck_num',
+					Pack_Description='$pck_desc',Pack_Marks_Number='$pck_marks_num',Description_of_Goods='$goods_desc',
+					weight='$weight',Exporter_name='$exp_name',Exporter_address='$exp_addr',Notify_code='$not_code',Notify_name='$not_name',
+					Notify_address='$not_addr',NotifyDesc='$notify_desc',Consignee_code='$cons_code',Consignee_name='$cons_name',
+					Consignee_address='$cons_addr',port_of_origin='$origine_code',Volume_in_cubic_meters='$Volume_in_cubic_meters',
+					PFstatus='$PFstatus',Submitee_Id=CONCAT('$Submitee_Id','FF'),type_of_igm='$type_of_igm',DG_status='$dg_status'
+					where id='$bl_id'";							
+			}
+			
+			$flag = $this->bm->dataUpdateDB1($updateIgmQry);
+			if($flag==1){
+				$msg = "<font color='blue'><strong>BL Amendment successful.</strong></font>";
+				
+				$Submitee_Org_Id = "";
+				if($igm_type=="sup")
+				{
+					$sql_ain="SELECT id AS rtnValue FROM organization_profiles
+							WHERE (AIN_No='$Submitee_Id' OR AIN_No_New='$Submitee_Id') AND Org_Type_id='4'";
+					$Submitee_Org_Id=$this->bm->dataReturnDb1($sql_ain);
+				}
+				else
+				{
+					$sql_ain="SELECT id AS rtnValue FROM organization_profiles
+							WHERE (AIN_No='$Submitee_Id' OR AIN_No_New='$Submitee_Id') AND Org_Type_id='1'";
+					$Submitee_Org_Id=$this->bm->dataReturnDb1($sql_ain);
+				}			
+				
+				$rotation_number = "";
+				$bl_number = "";
+				if($igm_type=="sup")
+					{
+						$sql_rot_bl = "SELECT Import_Rotation_No,BL_No FROM igm_supplimentary_detail WHERE id='$bl_id'";
+						$rslt_rot_bl = $this->bm->dataSelectDB1($sql_rot_bl);
+						for($i=0; $i<count($rslt_rot_bl); $i++){	   
+							$rotation_number=$rslt_rot_bl[$i]['Import_Rotation_No'];
+							$bl_number=$rslt_rot_bl[$i]['BL_No'];
+						}
+					}
+				else 
+					{
+						$sql_rot_bl = "SELECT Import_Rotation_No,BL_No FROM igm_details WHERE id='$bl_id'";
+						$rslt_rot_bl = $this->bm->dataSelectDB1($sql_rot_bl);
+						for($i=0; $i<count($rslt_rot_bl); $i++){	   
+							$rotation_number=$rslt_rot_bl[$i]['Import_Rotation_No'];
+							$bl_number=$rslt_rot_bl[$i]['BL_No'];
+						}
+					}
+				
+				$sql_edo_application_id = "SELECT id FROM edo_application_by_cf WHERE rotation='$rotation_number' AND bl='$bl_number'";
+				$rslt_edo_application_id = $this->bm->dataSelectDB1($sql_edo_application_id);
+				
+				if(count($rslt_edo_application_id)>0){
+					if($igm_type=="sup")
+					{
+						$sql_updateEDOContStatus = "UPDATE edo_application_by_cf SET ff_org_id='$Submitee_Org_Id' 
+												WHERE edo_application_by_cf.rotation='$rotation_number' AND bl='$bl_number'";
+						$res_updateEDOContStatus = $this->bm->dataUpdateDB1($sql_updateEDOContStatus);
+					}
+					else
+					{
+						$sql_updateEDOContStatus = "UPDATE edo_application_by_cf SET mlo='$Submitee_Org_Id' 
+												WHERE edo_application_by_cf.rotation='$rotation_number' AND bl='$bl_number'";
+						$res_updateEDOContStatus = $this->bm->dataUpdateDB1($sql_updateEDOContStatus);
+					}
+					
+				}
+			}
+			else{
+				$msg = "<font color='red'><strong>Try again please.</strong></font>";
+			}
+			
+			
+			$data['title'] = "IGM Amendment Form";
+			$data['msg'] = $msg;
+			
+			$this->load->view('cssAssets');
+			$this->load->view('headerTop');
+			$this->load->view('sidebar');
+			$this->load->view('igm_amendment_form',$data);
+			$this->load->view('jsAssets');			
+		}	
+	}
+}

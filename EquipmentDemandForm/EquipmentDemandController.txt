@@ -1,0 +1,190 @@
+	function cnfEquipmentDemandViewForm()
+	{	
+		$session_id = $this->session->userdata('value');
+		$LoginStat = $this->session->userdata('LoginStat');
+		$org_id=$this->session->userdata('org_Type_id');
+		$login_id = $this->session->userdata('login_id');
+
+		if($LoginStat!="yes")
+        {
+            $this->logout();
+        }
+        else
+        {
+			$data['flag'] = 0;	
+			
+            $this->load->view('cssAssetsList');
+            $this->load->view('headerTop');
+            $this->load->view('sidebar');
+            $this->load->view('cnfEquipmentDemandViewForm',$data);
+			$this->load->view('jsAssetsList');
+			
+		}
+	}
+
+	
+
+	function cnfEquipmentDemandSubmit()
+	{
+		$session_id = $this->session->userdata('value');
+		$LoginStat = $this->session->userdata('LoginStat');
+		$org_id=$this->session->userdata('org_Type_id');
+
+		if($LoginStat!="yes")
+		{
+			$this->logout();
+		}
+		else
+		{
+			$login_id = $this->session->userdata('login_id');
+			$rotation = $this->input->post('rotation');
+			$bl_no = $this->input->post('bl_no');
+			$vessel_name = $this->input->post('vessel_name');
+			$Line_no = $this->input->post('Line_no');
+			$be_no = $this->input->post('be_no');
+			$pkg_descripton = explode(" ",$this->input->post('pkg_descripton'));
+			$pkg_descripton = $pkg_descripton[1]." ".$pkg_descripton[0];
+			$total_pkg_weight = $this->input->post('total_pkg_weight');
+			$unit_pkg = $this->input->post('unit_pkg');
+			$c_no = $this->input->post('c_no');
+			$cont_40 = $this->input->post('cont_40');
+			$cont_20 = $this->input->post('cont_20');
+			$shed = $this->input->post('shed');
+			$demand_date = $this->input->post('demand_date');
+			$demand_type = $this->input->post('demand_type');
+			$ipaddr = $_SERVER['REMOTE_ADDR'];
+
+			$hyster_3t = $this->input->post('hyster_3t');
+			$hyster_5t = $this->input->post('hyster_5t');
+			$hyster_10t = $this->input->post('hyster_10t');
+		
+			$mbl_10t = $this->input->post('mbl_10t');
+			$mbl_20t = $this->input->post('mbl_20t');
+			$mbl_30t = $this->input->post('mbl_30t');
+			$mbl_50t = $this->input->post('mbl_50t');
+			
+			// One insert per day in equipment Master
+
+			// Check If Exist
+
+			$check_query = "SELECT COUNT(*) AS rtnValue FROM equip_demand_master WHERE demand_dt = '$demand_date'";
+			$check_rslt = $this->bm->dataReturnDB1($check_query);
+			
+			if($check_rslt == 0)
+			{
+				$insertMaster = "INSERT INTO equip_demand_master(demand_dt) VALUES('$demand_date')";
+				if(!$this->bm->dataInsertDB1($insertMaster))
+				{
+					$this->session->set_flashdata("error", "<div class='alert alert-danger'>
+					<button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
+					<font size='4'>Equipment Master id not found! Please try again.</font></div>");
+
+					redirect('Report/cnfEquipmentDemandViewForm/', 'refresh');
+				}
+			}
+			
+			$master_id = null;
+
+			$master_query = "SELECT id AS rtnValue FROM equip_demand_master WHERE demand_dt = '$demand_date'";
+			$master_id = $this->bm->dataReturnDB1($master_query);
+
+			if(is_numeric($master_id))
+			{
+				$insertQuery="insert into equip_demand_cf (equip_demand_mas_id,rotation,bl_no,demand_type,cont_20,cont_40,be_no,pkg_wt,pkg_qty_desc,shed_yard,demand_dt,cf_user,c_no,entry_time,entry_ip) 
+				values ('$master_id','$rotation','$bl_no','$demand_type','$cont_20','$cont_40','$be_no','$total_pkg_weight','$pkg_descripton','$shed','$demand_date','$login_id','$c_no',NOW(),'$ipaddr')";
+
+				if($this->bm->dataInsertDb1($insertQuery))
+				{
+					$query_igm_master = "SELECT id FROM equip_demand_cf  order by id asc";
+					$resultForIgm = $this->bm->dataSelectDb1($query_igm_master); 
+					$id=0;
+					for($k=0;$k<count($resultForIgm);$k++)
+					{
+					$id = $resultForIgm[$k]['id'];
+					}
+		
+
+					$insertQuery="insert into equip_qty_demand_cf(demand_id,hyster_3t,hyster_5t,hyster_10t,mbl_10t,mbl_20t,mbl_30t,mbl_50t) 
+					values ('$id','$hyster_3t','$hyster_5t','$hyster_10t','$mbl_10t','$mbl_20t','$mbl_30t','$mbl_50t')";
+					if($this->bm->dataInsertDb1($insertQuery))
+					{
+						$this->session->set_flashdata("success", "<div class='alert alert-success'>
+						<button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
+						<font size='4'>Successfully submitted...</font></div>");
+					}
+				
+				}
+				else
+				{
+					
+					$this->session->set_flashdata("error", "<div class='alert alert-danger'>
+					<button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
+					<font size='4'>Something wrong with Demand! Please try again.</font></div>");
+				}
+			}
+			else
+			{
+				$this->session->set_flashdata("error", "<div class='alert alert-danger'>
+					<button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
+					<font size='4'>Something wrong! Please try again.</font></div>");
+			}
+			
+			redirect('Report/cnfEquipmentDemandViewForm/', 'refresh');
+		
+		}
+	}
+
+	function cnfEquipmentDemandDelete()
+	{
+		$login_id = $this->session->userdata('login_id');
+		$u_name = $this->session->userdata('User_Name');
+		$LoginStat = $this->session->userdata('LoginStat');
+		$org_Type_id = $this->session->userdata('org_Type_id');
+		$org_id = $this->session->userdata('org_id');
+
+		if($LoginStat!="yes")
+		{
+			$this->logout();			
+		}
+		else
+		{
+			$data['msg']="";
+			if($this->input->post('delete'))
+			{
+				$eid=$this->input->post('eid');
+				$deleteSql="DELETE FROM equip_demand_cf WHERE equip_demand_cf.id='$eid'";
+				// $deleteStat=$this->bm->dataDeleteDb1($deleteSql);
+				$data['msg']="<font color='red'><b>Data Deleted.</b></font>";
+			}
+
+			redirect('Report/cnfEquipmentDemandViewForm/', 'refresh');
+		}
+	}
+
+	function cnfEquipmentDemandEdit()
+	{
+
+		$login_id = $this->session->userdata('login_id');
+		$u_name = $this->session->userdata('User_Name');
+
+
+		
+		if($LoginStat!="yes")
+		{
+			$this->logout();			
+		}
+		else
+		{
+		
+
+			$query_igm_master = "SELECT id,rotation,line_no,bl_no,cont_40,cont_20,be_no,hyster,mbl_craine,pkg_qty,pkg_wt,shed_yard,demand_dt,c_no,cf_user,entry_time,entry_ip
+			FROM equip_demand_cf where cf_user='$login_id' order by id desc";
+			$resultForIgm = $this->bm->dataSelectDb1($query_igm_master);							
+			
+			$this->load->view('cssAssetsList');
+			$this->load->view('headerTop');
+			$this->load->view('sidebar');
+			$this->load->view('cnfEquipmentDemandViewForm',$data);
+			$this->load->view('jsAssetsList');
+		}
+	}
